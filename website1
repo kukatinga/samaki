@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Stockfish | AI Conversation Engine</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0f172a;
+            --secondary: #1e293b;
+            --accent: #7c3aed;
+            --text: #e2e8f0;
+            --highlight: #a78bfa;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background-color: var(--primary);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+        
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(124, 58, 237, 0.1) 0%, rgba(124, 58, 237, 0) 70%);
+            animation: pulse 15s infinite alternate;
+            z-index: -1;
+        }
+        
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 0.3;
+            }
+            100% {
+                transform: scale(1.2);
+                opacity: 0.1;
+            }
+        }
+        
+        .hero-content {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            max-width: 800px;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--highlight);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .logo-icon {
+            width: 24px;
+            height: 24px;
+            background-color: var(--accent);
+            border-radius: 4px;
+            display: inline-block;
+        }
+        
+        h1 {
+            font-size: 4rem;
+            font-weight: 700;
+            line-height: 1.1;
+            background: linear-gradient(90deg, var(--highlight), var(--accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 1rem;
+        }
+        
+        .subtitle {
+            font-size: 1.5rem;
+            color: var(--text);
+            opacity: 0.9;
+            margin-bottom: 2rem;
+        }
+        
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+        
+        .btn-primary {
+            background-color: var(--accent);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--highlight);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(124, 58, 237, 0.3);
+        }
+        
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--text);
+            border: 1px solid var(--text);
+        }
+        
+        .btn-secondary:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        /* Chess Animation */
+        .chess-animation {
+            position: absolute;
+            right: -200px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 600px;
+            height: 600px;
+            opacity: 0.7;
+            z-index: -1;
+        }
+        
+        .chess-board {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .chess-piece {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background-color: var(--highlight);
+            border-radius: 50%;
+            filter: blur(1px);
+            animation: float 8s infinite ease-in-out;
+        }
+        
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) translateX(0);
+            }
+            50% {
+                transform: translateY(-20px) translateX(20px);
+            }
+        }
+        
+        /* Features Section */
+        .section {
+            padding: 8rem 0;
+        }
+        
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 3rem;
+            text-align: center;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        
+        .feature-card {
+            background-color: var(--secondary);
+            border-radius: 12px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 25px rgba(0, 0, 0, 0.2);
+            border-color: var(--accent);
+        }
+        
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: var(--accent);
+        }
+        
+        .feature-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        
+        .feature-desc {
+            color: rgba(226, 232, 240, 0.8);
+            font-size: 1rem;
+        }
+        
+        /* How It Works */
+        .how-it-works {
+            background-color: var(--secondary);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .how-it-works::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: radial-gradient(circle at 30% 50%, rgba(124, 58, 237, 0.1) 0%, transparent 50%);
+            z-index: 0;
+        }
+        
+        .steps {
+            display: flex;
+            flex-direction: column;
+            gap: 3rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .step {
+            display: flex;
+            gap: 2rem;
+            align-items: flex-start;
+        }
+        
+        .step-number {
+            background-color: var(--accent);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+        
+        .step-content {
+            flex: 1;
+        }
+        
+        .step-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        
+        .step-desc {
+            color: rgba(226, 232, 240, 0.8);
+        }
+        
+        /* CTA Section */
+        .cta-section {
+            text-align: center;
+            padding: 6rem 0;
+        }
+        
+        .cta-title {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+        }
+        
+        .cta-subtitle {
+            font-size: 1.2rem;
+            max-width: 700px;
+            margin: 0 auto 3rem;
+            color: rgba(226, 232, 240, 0.8);
+        }
+        
+        /* Footer */
+        footer {
+            background-color: var(--secondary);
+            padding: 3rem 0;
+            text-align: center;
+        }
+        
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .footer-link {
+            color: var(--text);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .footer-link:hover {
+            color: var(--highlight);
+        }
+        
+        .copyright {
+            color: rgba(226, 232, 240, 0.6);
+            font-size: 0.9rem;
+        }
+        
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .chess-animation {
+                display: none;
+            }
+            
+            h1 {
+                font-size: 3rem;
+            }
+            
+            .subtitle {
+                font-size: 1.2rem;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .hero {
+                padding-top: 6rem;
+            }
+            
+            h1 {
+                font-size: 2.5rem;
+            }
+            
+            .cta-buttons {
+                flex-direction: column;
+            }
+            
+            .step {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <div class="logo">
+                    <span class="logo-icon"></span>
+                    SOCIAL STOCKFISH
+                </div>
+                <h1>Engineer conversations like a chess grandmaster</h1>
+                <p class="subtitle">An AI that constantly looks 5 moves ahead in any conversation, so you always get exactly what you want.</p>
+                <div class="cta-buttons">
+                    <a href="#waitlist" class="btn btn-primary">Join Waitlist</a>
+                    <a href="#how-it-works" class="btn btn-secondary">How It Works</a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Chess Animation Background -->
+        <div class="chess-animation">
+            <div class="chess-board">
+                <div class="chess-piece" style="top: 10%; left: 20%; animation-delay: 0s;"></div>
+                <div class="chess-piece" style="top: 30%; left: 70%; animation-delay: 1s;"></div>
+                <div class="chess-piece" style="top: 60%; left: 40%; animation-delay: 2s;"></div>
+                <div class="chess-piece" style="top: 20%; left: 50%; animation-delay: 3s;"></div>
+                <div class="chess-piece" style="top: 70%; left: 10%; animation-delay: 4s;"></div>
+                <div class="chess-piece" style="top: 40%; left: 30%; animation-delay: 5s;"></div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Features Section -->
+    <section class="section">
+        <div class="container">
+            <h2 class="section-title">Never choke on words again</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">♟️</div>
+                    <h3 class="feature-title">Stockfish for Conversations</h3>
+                    <p class="feature-desc">Just like chess engines evaluate millions of moves, Social Stockfish simulates hundreds of conversation paths to find the optimal response.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🧠</div>
+                    <h3 class="feature-title">Monte Carlo Simulation</h3>
+                    <p class="feature-desc">Probability-weighted evaluation of conversation trees to calculate the highest expected value actions.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3 class="feature-title">Real-Time Strategy</h3>
+                    <p class="feature-desc">Integrated with WhatsApp and other platforms to provide strategic suggestions as you chat.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- How It Works -->
+    <section class="section how-it-works" id="how-it-works">
+        <div class="container">
+            <h2 class="section-title">How Social Stockfish Works</h2>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h3 class="step-title">Input Context & Goals</h3>
+                        <p class="step-desc">Provide your conversation history and define what you want to achieve from the interaction.</p>
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h3 class="step-title">Generate Conversation Tree</h3>
+                        <p class="step-desc">Two LLaMA 70B models play out hundreds of possible conversation variations in a tree structure.</p>
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h3 class="step-title">Evaluate Paths</h3>
+                        <p class="step-desc">A third model scores each full conversation path on how well it achieves your goal.</p>
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h3 class="step-title">Monte Carlo Simulation</h3>
+                        <p class="step-desc">Probability-weighted simulations calculate which opening move has the highest expected value.</p>
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">5</div>
+                    <div class="step-content">
+                        <h3 class="step-title">Optimal Response</h3>
+                        <p class="step-desc">You receive the perfect next message to achieve your conversational goals.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- CTA Section -->
+    <section class="section cta-section" id="waitlist">
+        <div class="container">
+            <h2 class="cta-title">Ready to master every conversation?</h2>
+            <p class="cta-subtitle">Join our waitlist to be among the first to experience Social Stockfish - the AI that thinks 5 moves ahead so you don't have to.</p>
+            <form class="waitlist-form" style="max-width: 500px; margin: 0 auto;">
+                <input type="email" placeholder="Your email address" style="width: 100%; padding: 1rem; border-radius: 8px; border: 1px solid var(--text); background: transparent; color: var(--text); margin-bottom: 1rem;">
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Join Waitlist</button>
+            </form>
+        </div>
+    </section>
+    
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-links">
+                <a href="#" class="footer-link">Privacy</a>
+                <a href="#" class="footer-link">Terms</a>
+                <a href="#" class="footer-link">Contact</a>
+                <a href="#" class="footer-link">GitHub</a>
+            </div>
+            <p class="copyright">© 2023 Social Stockfish. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>
