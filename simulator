@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Stockfish | AI Conversation Strategist</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-dark: #0a0a12;
+            --bg-darker: #06060b;
+            --primary: #00f0ff;
+            --secondary: #ff00f0;
+            --text: #e0e0ff;
+            --text-dim: #a0a0c0;
+            --card-bg: rgba(20, 20, 40, 0.6);
+            --glow: 0 0 15px rgba(0, 240, 255, 0.7);
+            --success: #00ffaa;
+        }
+
+        /* Previous styles remain the same until .demo-section */
+
+        /* Enhanced Demo Section */
+        .demo-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            align-items: center;
+        }
+
+        .interactive-demo {
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            height: 600px;
+            background: var(--card-bg);
+            border-radius: 10px;
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            box-shadow: var(--glow);
+            overflow: hidden;
+        }
+
+        .demo-header {
+            padding: 1rem;
+            background: rgba(0, 240, 255, 0.1);
+            border-bottom: 1px solid rgba(0, 240, 255, 0.3);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .demo-scenario-selector {
+            background: transparent;
+            border: 1px solid var(--primary);
+            color: var(--text);
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+        }
+
+        .chat-container {
+            padding: 1rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 0.8rem 1rem;
+            border-radius: 12px;
+            position: relative;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .them {
+            background: #222;
+            color: var(--text);
+            margin-right: auto;
+            border-bottom-left-radius: 0;
+        }
+
+        .you {
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            color: #000;
+            margin-left: auto;
+            border-bottom-right-radius: 0;
+            font-weight: 600;
+        }
+
+        .ai-suggestion {
+            background: rgba(0, 240, 255, 0.1);
+            color: var(--primary);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            margin: 1rem auto;
+            border-radius: 8px;
+            padding: 1rem;
+            width: 90%;
+            position: relative;
+        }
+
+        .ai-suggestion::before {
+            content: 'Social Stockfish Suggests (87% EV)';
+            position: absolute;
+            top: -18px;
+            left: 10px;
+            font-size: 0.7rem;
+            background: var(--bg-dark);
+            padding: 0 5px;
+            color: var(--primary);
+        }
+
+        .response-options {
+            display: flex;
+            gap: 0.5rem;
+            padding: 1rem;
+            border-top: 1px solid rgba(0, 240, 255, 0.2);
+        }
+
+        .response-btn {
+            flex: 1;
+            padding: 0.6rem;
+            background: rgba(0, 240, 255, 0.1);
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.8rem;
+            text-align: center;
+        }
+
+        .response-btn:hover {
+            background: rgba(0, 240, 255, 0.2);
+        }
+
+        .response-btn.optimal {
+            background: rgba(0, 255, 170, 0.2);
+            border-color: var(--success);
+            color: var(--success);
+            font-weight: 600;
+        }
+
+        /* Visualization Panel */
+        .visualization-panel {
+            height: 600px;
+            background: var(--card-bg);
+            border-radius: 10px;
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            box-shadow: var(--glow);
+            padding: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .conversation-tree {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .node {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: rgba(0, 240, 255, 0.2);
+            border: 2px solid var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-size: 0.7rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            z-index: 2;
+        }
+
+        .node.active {
+            background: var(--primary);
+            color: var(--bg-dark);
+            box-shadow: 0 0 10px var(--primary);
+            transform: scale(1.2);
+        }
+
+        .node.optimal {
+            background: var(--success);
+            border-color: var(--success);
+            color: var(--bg-dark);
+        }
+
+        .path {
+            position: absolute;
+            height: 2px;
+            background: rgba(0, 240, 255, 0.3);
+            transform-origin: 0 0;
+            z-index: 1;
+        }
+
+        .path.active {
+            background: var(--primary);
+            box-shadow: 0 0 5px var(--primary);
+        }
+
+        .path.optimal {
+            background: var(--success);
+            box-shadow: 0 0 5px var(--success);
+        }
+
+        .stats-panel {
+            position: absolute;
+            bottom: 1rem;
+            left: 1rem;
+            right: 1rem;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 8px;
+            padding: 1rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .demo-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .interactive-demo,
+            .visualization-panel {
+                height: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Previous sections remain the same until demo section -->
+
+    <!-- Enhanced Demo Section -->
+    <section class="section demo-section" id="demo">
+        <div class="container">
+            <h2 class="section-title">Interactive Demonstration</h2>
+            <p class="section-subtitle">Experience how Social Stockfish analyzes conversations in real-time</p>
+            
+            <div class="demo-container">
+                <div class="interactive-demo">
+                    <div class="demo-header">
+                        <span>Conversation Simulator</span>
+                        <select class="demo-scenario-selector" id="scenario-selector">
+                            <option value="dating">Dating Scenario</option>
+                            <option value="negotiation">Job Negotiation</option>
+                            <option value="networking">Professional Networking</option>
+                        </select>
+                    </div>
+                    
+                    <div class="chat-container" id="chat-container">
+                        <!-- Messages will be added here by JavaScript -->
+                    </div>
+                    
+                    <div class="response-options" id="response-options">
+                        <!-- Response buttons will be added here by JavaScript -->
+                    </div>
+                </div>
+                
+                <div class="visualization-panel">
+                    <div class="conversation-tree" id="conversation-tree">
+                        <!-- Conversation tree visualization -->
+                    </div>
+                    <div class="stats-panel">
+                        <div class="stat">
+                            <div class="stat-value" id="paths-evaluated">0</div>
+                            <div class="stat-label">Paths Evaluated</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value" id="success-prob">0%</div>
+                            <div class="stat-label">Success Probability</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value" id="response-time">0ms</div>
+                            <div class="stat-label">Response Time</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value" id="tree-depth">0</div>
+                            <div class="stat-label">Tree Depth</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Previous sections remain the same -->
+
+    <script>
+        // Conversation scenarios
+        const scenarios = {
+            dating: {
+                goal: "Get a date for Friday night",
+                messages: [
+                    { sender: "them", text: "Hey! How's your week going?" },
+                    { sender: "you", text: "Pretty good! Just been working on some new projects. You?" },
+                    { sender: "them", text: "Same old same old. Need something fun to break the routine" }
+                ],
+                responses: [
+                    { text: "Want to grab coffee sometime?", ev: 0.62 },
+                    { text: "There's a new speakeasy downtown - want to check it out Friday?", ev: 0.87, optimal: true },
+                    { text: "I know what you mean. Work has been crazy", ev: 0.35 }
+                ],
+                nextSteps: {
+                    "Want to grab coffee sometime?": [
+                        { sender: "them", text: "Maybe! What days are you free?" }
+                    ],
+                    "There's a new speakeasy downtown - want to check it out Friday?": [
+                        { sender: "them", text: "Ooh that sounds perfect! I'm free after 8" }
+                    ],
+                    "I know what you mean. Work has been crazy": [
+                        { sender: "them", text: "Yeah... anyway, I should get back to it" }
+                    ]
+                }
+            },
+            negotiation: {
+                goal: "Negotiate higher salary",
+                messages: [
+                    { sender: "them", text: "We're excited to offer you the position at $85,000" },
+                    { sender: "you", text: "Thank you for the offer! I'm really excited about this opportunity" },
+                    { sender: "them", text: "Great! When can you start?" }
+                ],
+                responses: [
+                    { text: "That sounds fair, I accept!", ev: 0.10 },
+                    { text: "Based on my research, $95,000 would be more competitive for this role", ev: 0.78, optimal: true },
+                    { text: "Could we discuss benefits instead?", ev: 0.45 }
+                ],
+                nextSteps: {
+                    "That sounds fair, I accept!": [
+                        { sender: "them", text: "Wonderful! We'll send over the paperwork" }
+                    ],
+                    "Based on my research, $95,000 would be more competitive for this role": [
+                        { sender: "them", text: "Let me check with HR... we could do $92,000" }
+                    ],
+                    "Could we discuss benefits instead?": [
+                        { sender: "them", text: "Our benefits package is standard for all employees" }
+                    ]
+                }
+            },
+            networking: {
+                goal: "Get introduction to CTO",
+                messages: [
+                    { sender: "them", text: "Great meeting you at the conference today!" },
+                    { sender: "you", text: "Likewise! I really enjoyed your talk on AI applications" },
+                    { sender: "them", text: "Thanks! Let me know if you'd like to connect further" }
+                ],
+                responses: [
+                    { text: "Let's grab coffee next week", ev: 0.55 },
+                    { text: "Actually, I'd love an intro to your CTO - we're working on similar problems", ev: 0.82, optimal: true },
+                    { text: "Will do! Here's my LinkedIn", ev: 0.30 }
+                ],
+                nextSteps: {
+                    "Let's grab coffee next week": [
+                        { sender: "them", text: "Sure, how about Tuesday at 2pm?" }
+                    ],
+                    "Actually, I'd love an intro to your CTO - we're working on similar problems": [
+                        { sender: "them", text: "Happy to make that intro - let me check with her first" }
+                    ],
+                    "Will do! Here's my LinkedIn": [
+                        { sender: "them", text: "Great, just sent you a connection request" }
+                    ]
+                }
+            }
+        };
+
+        // DOM elements
+        const chatContainer = document.getElementById('chat-container');
+        const responseOptions = document.getElementById('response-options');
+        const scenarioSelector = document.getElementById('scenario-selector');
+        const conversationTree = document.getElementById('conversation-tree');
+        const pathsEvaluatedEl = document.getElementById('paths-evaluated');
+        const successProbEl = document.getElementById('success-prob');
+        const responseTimeEl = document.getElementById('response-time');
+        const treeDepthEl = document.getElementById('tree-depth');
+
+        // Current state
+        let currentScenario = 'dating';
+        let conversationState = [];
+        let treeNodes = [];
+        let treePaths = [];
+
+        // Initialize
+        function init() {
+            loadScenario(currentScenario);
+            scenarioSelector.addEventListener('change', (e) => {
+                currentScenario = e.target.value;
+                loadScenario(currentScenario);
+            });
+        }
+
+        // Load a scenario
+        function loadScenario(scenario) {
+            const data = scenarios[scenario];
+            conversationState = [...data.messages];
+            renderConversation();
+            renderResponses(data.responses);
+            renderTreeVisualization();
+            updateStats(243, data.responses.find(r => r.optimal).ev * 100, 142, 5);
+        }
+
+        // Render conversation messages
+        function renderConversation() {
+            chatContainer.innerHTML = '';
+            conversationState.forEach(msg => {
+                const msgEl = document.createElement('div');
+                msgEl.className = `message ${msg.sender}`;
+                msgEl.textContent = msg.text;
+                chatContainer.appendChild(msgEl);
+            });
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        // Render response options
+        function renderResponses(responses) {
+            responseOptions.innerHTML = '';
+            
+            // Add AI suggestion
+            const suggestion = document.createElement('div');
+            suggestion.className = 'ai-suggestion';
+            suggestion.textContent = `Goal: ${scenarios[currentScenario].goal}`;
+            chatContainer.appendChild(suggestion);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            
+            // Add response buttons
+            responses.forEach(res => {
+                const btn = document.createElement('div');
+                btn.className = `response-btn ${res.optimal ? 'optimal' : ''}`;
+                btn.textContent = res.text;
+                btn.addEventListener('click', () => selectResponse(res.text));
+                responseOptions.appendChild(btn);
+            });
+        }
+
+        // Handle response selection
+        function selectResponse(responseText) {
+            // Add user response to conversation
+            conversationState.push({ sender: 'you', text: responseText });
+            renderConversation();
+            
+            // Add AI analysis of response
+            setTimeout(() => {
+                const response = scenarios[currentScenario].responses.find(r => r.text === responseText);
+                const analysis = document.createElement('div');
+                analysis.className = 'ai-suggestion';
+                analysis.textContent = `EV Analysis: ${(response.ev * 100).toFixed(0)}% success probability`;
+                chatContainer.appendChild(analysis);
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+                
+                // Show next steps after delay
+                setTimeout(() => {
+                    const nextSteps = scenarios[currentScenario].nextSteps[responseText];
+                    nextSteps.forEach(step => {
+                        conversationState.push(step);
+                        renderConversation();
+                    });
+                    
+                    // Update visualization to show path taken
+                    updateTreeVisualization(response.optimal);
+                }, 1000);
+            }, 800);
+            
+            // Disable buttons during processing
+            responseOptions.querySelectorAll('.response-btn').forEach(btn => {
+                btn.style.opacity = '0.5';
+                btn.style.pointerEvents = 'none';
+            });
+        }
+
+        // Render tree visualization
+        function renderTreeVisualization() {
+            conversationTree.innerHTML = '';
+            treeNodes = [];
+            treePaths = [];
+            
+            // Create root node
+            const rootNode = createNode(50, 50, 'Start');
+            rootNode.classList.add('active');
+            
+            // Create first level nodes
+            const level1Nodes = [];
+            const responses = scenarios[currentScenario].responses;
+            const angleStep = 180 / (responses.length - 1);
+            
+            responses.forEach((res, i) => {
+                const angle = 180 + (i * angleStep);
+                const x = 50 + 30 * Math.cos(angle * Math.PI / 180);
+                const y = 50 + 30 * Math.sin(angle * Math.PI / 180);
+                
+                const node = createNode(x, y, (res.ev * 100).toFixed(0) + '%');
+                if (res.optimal) node.classList.add('optimal');
+                
+                const path = createPath(50, 50, x, y);
+                if (res.optimal) path.classList.add('optimal');
+                
+                level1Nodes.push(node);
+                treeNodes.push(node);
+                treePaths.push(path);
+            });
+            
+            // Create second level nodes (simplified)
+            if (window.innerWidth > 1024) {
+                level1Nodes.forEach((node, i) => {
+                    const rect = node.getBoundingClientRect();
+                    const parentX = parseFloat(node.style.left);
+                    const parentY = parseFloat(node.style.top);
+                    
+                    for (let j = 0; j < 3; j++) {
+                        const angle = 180 + (j * 60);
+                        const x = parentX + 20 * Math.cos(angle * Math.PI / 180);
+                        const y = parentY + 20 * Math.sin(angle * Math.PI / 180);
+                        
+                        const childNode = createNode(x, y, (70 + j * 5) + '%');
+                        const childPath = createPath(parentX, parentY, x, y);
+                        
+                        treeNodes.push(childNode);
+                        treePaths.push(childPath);
+                    }
+                });
+            }
+        }
+
+        // Update tree visualization after selection
+        function updateTreeVisualization(isOptimal) {
+            // Highlight optimal path if chosen
+            if (isOptimal) {
+                document.querySelectorAll('.node.optimal').forEach(node => {
+                    node.classList.add('active');
+                });
+                document.querySelectorAll('.path.optimal').forEach(path => {
+                    path.classList.add('active');
+                });
+            }
+            
+            // Update stats
+            updateStats(387, isOptimal ? 92 : 64, 245, 6);
+        }
+
+        // Create a node element
+        function createNode(x, y, label) {
+            const node = document.createElement('div');
+            node.className = 'node';
+            node.style.left = `${x}%`;
+            node.style.top = `${y}%`;
+            node.textContent = label;
+            conversationTree.appendChild(node);
+            return node;
+        }
+
+        // Create a path element
+        function createPath(x1, y1, x2, y2) {
+            const path = document.createElement('div');
+            path.className = 'path';
+            
+            // Calculate length and angle
+            const length = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+            const angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+            
+            path.style.width = `${length}%`;
+            path.style.left = `${x1}%`;
+            path.style.top = `${y1}%`;
+            path.style.transform = `rotate(${angle}deg)`;
+            
+            conversationTree.appendChild(path);
+            return path;
+        }
+
+        // Update statistics
+        function updateStats(paths, prob, time, depth) {
+            animateCounter(pathsEvaluatedEl, paths);
+            animateCounter(successProbEl, prob, '%');
+            animateCounter(responseTimeEl, time, 'ms');
+            animateCounter(treeDepthEl, depth);
+        }
+
+        // Animate counter
+        function animateCounter(element, target, suffix = '') {
+            let current = parseInt(element.textContent.replace(/\D/g, '')) || 0;
+            const increment = Math.ceil((target - current) / 20);
+            
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) {
+                    clearInterval(timer);
+                    current = target;
+                }
+                element.textContent = current + suffix;
+            }, 30);
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
